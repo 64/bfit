@@ -39,10 +39,14 @@ fn interpret(op_list: &[Op], jump_table: &[usize]) {
             }
             Op::Output => {
                 #[cfg(not(target_os = "windows"))]
-                unsafe { libc::putchar_unlocked(memory[data_ptr] as i32); }
+                unsafe {
+                    libc::putchar_unlocked(memory[data_ptr] as i32);
+                }
 
                 #[cfg(target_os = "windows")]
-                unsafe { libc::putchar(memory[data_ptr] as i32); }
+                unsafe {
+                    libc::putchar(memory[data_ptr] as i32);
+                }
 
                 op_ptr += 1;
             }
@@ -55,7 +59,13 @@ fn interpret(op_list: &[Op], jump_table: &[usize]) {
 }
 
 pub fn main() {
-    let source = std::env::args().nth(1).expect("no program source");
+    let source = std::fs::read_to_string(
+        std::env::args()
+            .nth(1)
+            .expect("no program source path provided"),
+    )
+    .expect("failed to read source file");
+
     let mut op_list = Vec::with_capacity(source.len());
 
     for byte in source.bytes() {
